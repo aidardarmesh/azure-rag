@@ -1,10 +1,11 @@
+require('dotenv').config();
 const { CosmosClient } = require("@azure/cosmos");
 
-// CosmosDB configuration
-const endpoint = "";
-const key = "";
-const databaseId = "";
-const containerId = "";
+// CosmosDB configuration from .env
+const endpoint = process.env.COSMOS_ENDPOINT;
+const key = process.env.COSMOS_KEY;
+const databaseId = process.env.COSMOS_DATABASE_ID;
+const containerId = process.env.COSMOS_CONTAINER_ID;
 
 // Initialize Cosmos client and container reference
 const client = new CosmosClient({ endpoint, key });
@@ -48,6 +49,6 @@ async function startPolling(sessionId) {
 }
 
 // Replace 'your-session-id' with actual session_id you want to monitor
-const sessionIdToMonitor = "";
+const sessionIdToMonitor = process.env.SESSION_ID_TO_MONITOR;
 
 startPolling(sessionIdToMonitor);
