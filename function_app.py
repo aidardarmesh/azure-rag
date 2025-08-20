@@ -4,6 +4,7 @@ import logging
 
 app = func.FunctionApp()
 
+@app.function_name(name="CosmosDbTriggerFunction")
 @app.cosmos_db_trigger(
     arg_name="azcosmosdb",
     container_name="agents",
@@ -24,7 +25,6 @@ def cosmosdb_trigger(
         logging.info(f"{len(azcosmosdb)} document changes detected.")
         messages = []
         for doc in azcosmosdb:
-            # Send each changed document as a SignalR message to all clients
             message = SignalRMessage(
                 target="newAgentUpdate",
                 arguments=[doc.to_json()]
@@ -35,8 +35,7 @@ def cosmosdb_trigger(
     else:
         logging.info("No document changes detected.")
 
-# HTTP triggered function to provide SignalR connection info to frontend
-@app.function_name(name="negotiate")
+@app.function_name(name="NegotiateFunction")
 @app.route(route="negotiate", methods=["GET"])
 @app.signalr_connection_info(
     name="signalRConnectionInfo",
