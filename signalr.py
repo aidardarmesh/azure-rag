@@ -2,6 +2,9 @@ import requests
 import json
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 class Settings(BaseSettings):
     signalr_endpoint: str = Field(alias="SIGNALR_ENDPOINT")
