@@ -1,5 +1,6 @@
 import azure.functions as func
 import logging
+from pprint import pprint
 
 app = func.FunctionApp()
 
@@ -10,4 +11,5 @@ app = func.FunctionApp()
                         lease_container_name="leases",
                         create_lease_container_if_not_exists=True)
 def cosmosdb_trigger(azcosmosdb: func.DocumentList):
-    logging.info('Python CosmosDB triggered.')
+    pprint(azcosmosdb)
+    #logging.info('Python CosmosDB triggered.')
