@@ -35,4 +35,14 @@ def cosmosdb_trigger(
     else:
         logging.info("No document changes detected.")
 
-
+# HTTP triggered function to provide SignalR connection info to frontend
+@app.function_name(name="negotiate")
+@app.route(route="negotiate", methods=["GET"])
+@app.signalr_connection_info(
+    name="signalRConnectionInfo",
+    hub_name="agentsHub",
+    connection_string_setting="AzureSignalRConnectionString"
+)
+def negotiate(req: func.HttpRequest, 
+              signalRConnectionInfo: func.Out[func.SignalRConnectionInfo]) -> func.HttpResponse:
+    return func.HttpResponse(signalRConnectionInfo.get(), status_code=200, mimetype="application/json")
