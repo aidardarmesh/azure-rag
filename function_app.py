@@ -13,7 +13,7 @@ app = func.FunctionApp()
     create_lease_container_if_not_exists=True)
 @app.signalr_output(
     arg_name="signalr_messages",
-    hub_name="n8nHub",
+    hub_name="agentsHub",
     connection="AzureSignalRConnectionString"
 )
 def cosmosdb_trigger(
