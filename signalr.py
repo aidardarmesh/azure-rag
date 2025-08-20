@@ -1,10 +1,11 @@
-import requests
 import json
-from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 import logging
+from azure.messaging.webpubsubservice import WebPubSubServiceClient
+from azure.core.credentials import AzureKeyCredential
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 class Settings(BaseSettings):
     signalr_endpoint: str = Field(alias="SIGNALR_ENDPOINT")
@@ -17,31 +18,45 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-settings = Settings()
+def send_signalr_message():
+    try:
+        # Load settings
+        settings = Settings()
+        print(f"Using SignalR endpoint: {settings.signalr_endpoint}")
+        print(f"Using hub name: {settings.signalr_hub_name}")
+        print(f"Using access key: {settings.signalr_access_key}")
 
-# Construct the URL for send message
-url = f"{settings.signalr_endpoint}/api/v1/hubs/{settings.signalr_hub_name}/:send?api-version=2023-05-01"
-
-# Your static JSON message to broadcast
-message = {
-    "target": "broadcastMessage",  # The method clients listen to
-    "arguments": [
-        {
-            "text": "Hello from Python broadcast!",
-            "otherKey": "otherValue"
+        # Create the SignalR service client with the Azure SDK
+        service_client = WebPubSubServiceClient(
+            endpoint=settings.signalr_endpoint,
+            hub=settings.signalr_hub_name,
+            credential=AzureKeyCredential(settings.signalr_access_key)
+        )
+        
+        # Message to send - properly formatted for SignalR
+        message_content = {
+            "target": "broadcastMessage",
+            "arguments": [
+                {
+                    "text": "Hello from Azure SignalR!",
+                    "sender": "user123",
+                    "timestamp": "2025-08-20T14:56:00Z"
+                }
+            ]
         }
-    ]
-}
 
-# Headers required for request
-headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {settings.signalr_access_key}"
-}
+        
+        # Send message to all connected clients
+        service_client.send_to_all(
+            message=message_content,
+            content_type="application/json"
+        )
+        
+        print("Message sent successfully!")
+        
+    except Exception as e:
+        logging.error(f"Error sending SignalR message: {str(e)}")
+        print(f"Error: {str(e)}")
 
-# Send POST request to broadcast the message
-response = requests.post(url, headers=headers, data=json.dumps(message))
-
-# Print response status
-print("Status Code:", response.status_code)
-print("Response Body:", response.text)
+if __name__ == "__main__":
+    send_signalr_message()
